@@ -401,7 +401,7 @@ async function bootLocalInfo() {
         // Open-Meteo current weather docs :contentReference[oaicite:4]{index=4}
         const wxUrl =
           `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}` +
-          `&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
+          `&current=temperature_2m,weather_code,is_day&temperature_unit=celsius&timezone=auto`;
 
         const wx = await fetchJson(wxUrl);
         temp = (wx && wx.current) ? num(wx.current.temperature_2m) : null;
