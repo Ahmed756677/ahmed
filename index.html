@@ -262,118 +262,175 @@
           requestAnimationFrame(loop);
         })();
       }
+// --- Local time + weather (IP-based, hardened) ---
+const localPill = document.getElementById('localPill');
+const localPlace = document.getElementById('localPlace');
+const localTime = document.getElementById('localTime');
+const localWeather = document.getElementById('localWeather');
 
-      // --- Local time + weather (IP-based, no backend) ---
-      const localPill = document.getElementById('localPill');
-      const localPlace = document.getElementById('localPlace');
-      const localTime = document.getElementById('localTime');
-      const localWeather = document.getElementById('localWeather');
+function wmoToEmoji(code) {
+  if (code === 0) return "☀️";
+  if (code === 1) return "🌤️";
+  if (code === 2) return "⛅";
+  if (code === 3) return "☁️";
+  if (code === 45 || code === 48) return "🌫️";
+  if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "🌧️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "🌨️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  return "🌡️";
+}
 
-      function wmoToEmoji(code) {
-        if (code === 0) return "☀️";
-        if (code === 1) return "🌤️";
-        if (code === 2) return "⛅";
-        if (code === 3) return "☁️";
-        if (code === 45 || code === 48) return "🌫️";
-        if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
-        if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
-        if ([71, 73, 75, 77, 85, 86].includes(code)) return "🌨️";
-        if ([80, 81, 82].includes(code)) return "🌧️";
-        if ([95, 96, 99].includes(code)) return "⛈️";
-        return "🌡️";
+function formatTime(tz) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: tz
+    }).format(new Date());
+  } catch {
+    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date());
+  }
+}
+
+async function fetchJson(url, timeoutMs = 6000) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+async function getGeoBestEffort() {
+  // Try multiple providers so adblock / regional blocks don’t kill you
+  // 1) ipapi.co (no key)  :contentReference[oaicite:2]{index=2}
+  try {
+    const d = await fetchJson("https://ipapi.co/json/");
+    const lat = num(d.latitude);
+    const lon = num(d.longitude);
+    if (lat != null && lon != null) {
+      return {
+        place: [d.city, d.country_name].filter(Boolean).join(", ") || "Your area",
+        tz: d.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        lat, lon
+      };
+    }
+  } catch (e) { /* try next */ }
+
+  // 2) ipinfo.io (no token attempt; may rate limit) :contentReference[oaicite:3]{index=3}
+  try {
+    const d = await fetchJson("https://ipinfo.io/json");
+    const loc = (d.loc || "").split(",");
+    const lat = num(loc[0]);
+    const lon = num(loc[1]);
+    if (lat != null && lon != null) {
+      return {
+        place: [d.city, d.country].filter(Boolean).join(", ") || "Your area",
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        lat, lon
+      };
+    }
+  } catch (e) { /* try next */ }
+
+  // 3) ipwho.is (often works when others don’t)
+  try {
+    const d = await fetchJson("https://ipwho.is/");
+    if (d && d.success) {
+      const lat = num(d.latitude);
+      const lon = num(d.longitude);
+      if (lat != null && lon != null) {
+        return {
+          place: [d.city, d.country].filter(Boolean).join(", ") || "Your area",
+          tz: (d.timezone && d.timezone.id) ? d.timezone.id : Intl.DateTimeFormat().resolvedOptions().timeZone,
+          lat, lon
+        };
+      }
+    }
+  } catch (e) { /* fall through */ }
+
+  return null;
+}
+
+async function bootLocalInfo() {
+  if (!localPill || !localPlace || !localTime || !localWeather) return;
+
+  // Always show the pill (no silent disappearance)
+  localPill.classList.remove('hidden');
+  localPill.classList.add('inline-flex');
+  localPlace.textContent = "Locating…";
+  localTime.textContent = "--:--";
+  localWeather.textContent = "--";
+
+  // If you are testing by double-clicking the HTML file (file://),
+  // many APIs will block requests. Run a local server instead:
+  // python -m http.server 8000
+
+  const CACHE_KEY = "geoWxCache_v2";
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch {}
+  const fresh = cached && (Date.now() - cached.t) < (3 * 60 * 60 * 1000); // 3 hours
+
+  let place = "Your area";
+  let tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let lat = null, lon = null;
+  let temp = null, code = null;
+
+  try {
+    if (fresh) {
+      ({ place, tz, lat, lon, temp, code } = cached);
+    } else {
+      const geo = await getGeoBestEffort();
+      if (geo) {
+        place = geo.place;
+        tz = geo.tz || tz;
+        lat = geo.lat;
+        lon = geo.lon;
       }
 
-      function formatTime(tz) {
-        try {
-          return new Intl.DateTimeFormat(undefined, {
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: tz
-          }).format(new Date());
-        } catch {
-          return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date());
-        }
+      // Weather only if we got coordinates
+      if (lat != null && lon != null) {
+        // Open-Meteo current weather docs :contentReference[oaicite:4]{index=4}
+        const wxUrl =
+          `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}` +
+          `&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
+
+        const wx = await fetchJson(wxUrl);
+        temp = (wx && wx.current) ? num(wx.current.temperature_2m) : null;
+        code = (wx && wx.current) ? num(wx.current.weather_code) : null;
+        tz = (wx && wx.timezone) ? wx.timezone : tz;
       }
 
-      async function fetchJson(url, timeoutMs = 4500) {
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), timeoutMs);
-        try {
-          const res = await fetch(url, {
-            signal: controller.signal,
-            headers: { 'Accept': 'application/json' }
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return await res.json();
-        } finally {
-          clearTimeout(t);
-        }
-      }
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), place, tz, lat, lon, temp, code }));
+    }
+  } catch (e) {
+    // Keep showing time even if everything fails
+  }
 
-      async function bootLocalInfo() {
-        if (!localPill || !localPlace || !localTime || !localWeather) return;
+  localPlace.textContent = place;
 
-        // show pill while loading
-        localPill.classList.remove('hidden');
-        localPill.classList.add('inline-flex');
-        localPlace.textContent = "Locating…";
-        localTime.textContent = "--:--";
-        localWeather.textContent = "--°";
+  const tick = () => { localTime.textContent = formatTime(tz); };
+  tick();
+  setInterval(tick, 15000);
 
-        // cache to reduce API calls
-        const CACHE_KEY = "geoWxCache_v1";
-        let cached = null;
-        try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch { /* noop */ }
-        const fresh = cached && (Date.now() - cached.t) < (6 * 60 * 60 * 1000); // 6 hours
+  if (temp != null) {
+    const emoji = (code != null) ? wmoToEmoji(code) : "🌡️";
+    localWeather.textContent = `${emoji} ${Math.round(temp)}°C`;
+  } else {
+    localWeather.textContent = "Weather unavailable";
+  }
+}
 
-        try {
-          let place, tz, temp, code;
+bootLocalInfo();
 
-          if (fresh) {
-            ({ place, tz, temp, code } = cached);
-          } else {
-            // 1) IP -> approximate lat/lon + timezone + city
-            const geo = await fetchJson("https://ipapi.co/json/");
-            const lat = geo.latitude;
-            const lon = geo.longitude;
-
-            place = [geo.city, geo.country_name].filter(Boolean).join(", ");
-            tz = geo.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-            if (typeof lat !== "number" || typeof lon !== "number") throw new Error("Missing lat/lon");
-
-            // 2) lat/lon -> current weather (Open-Meteo)
-            const wxUrl =
-              `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}` +
-              `&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
-
-            const wx = await fetchJson(wxUrl);
-            temp = wx?.current?.temperature_2m;
-            code = wx?.current?.weather_code;
-            tz = wx?.timezone || tz;
-
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), place, tz, temp, code }));
-          }
-
-          // render
-          localPlace.textContent = place || "Your area";
-          const emoji = (typeof code === "number") ? wmoToEmoji(code) : "🌡️";
-          localWeather.textContent = (typeof temp === "number")
-            ? `${emoji} ${Math.round(temp)}°C`
-            : `${emoji} --°`;
-
-          // ticking clock in visitor's inferred timezone
-          const tick = () => { localTime.textContent = formatTime(tz); };
-          tick();
-          setInterval(tick, 15000);
-        } catch (err) {
-          // fail quietly: preserve minimal aesthetic
-          localPill.classList.add('hidden');
-          localPill.classList.remove('inline-flex');
-        }
-      }
-
-      bootLocalInfo();
 
       console.log('[STUDIO TEST] ✓ booted');
     });
