@@ -5,24 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Ahmed Abdullah — Personal</title>
   <meta name="description" content="An interactive, minimal personal studio for Ahmed Abdullah." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif','system-ui']},colors:{brand:{50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a'}}}}};
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    };
   </script>
+
   <style>
-    html{scroll-behavior:smooth}
-    .noise{position:absolute;inset:-50%;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="120" height="120" filter="url(%23n)" opacity="0.035"/></svg>');animation:noise 2s steps(10) infinite;mix-blend-mode:overlay;pointer-events:none}
-    @keyframes noise{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-10%,10%,0)}}
-    @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-    .glass{backdrop-filter:blur(18px) saturate(1.1);background:rgba(255,255,255,.55)}
-    .dark .glass{background:rgba(2,6,23,.55)}
-    .soft-shadow{box-shadow:0 10px 30px rgba(2,6,23,.20), 0 6px 18px rgba(2,6,23,.18)}
-    .dot{position:absolute;border-radius:9999px;opacity:.7;filter:blur(20px)}
+    html { scroll-behavior: smooth }
+    .noise{
+      position:absolute; inset:-50%;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.035'/></svg>");
+      animation:noise 2s steps(10) infinite;
+      mix-blend-mode:overlay;
+      pointer-events:none
+    }
+    @keyframes noise { 0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(-10%,10%,0)} }
+    @keyframes floaty { 0%{transform:translateY(0)} 50%{transform:translateY(-6px)} 100%{transform:translateY(0)} }
+    .glass { backdrop-filter:blur(18px) saturate(1.1); background:rgba(255,255,255,.55) }
+    .dark .glass { background:rgba(2,6,23,.55) }
+    .soft-shadow { box-shadow:0 10px 30px rgba(2,6,23,.20), 0 6px 18px rgba(2,6,23,.18) }
   </style>
 </head>
+
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden">
   <!-- Interactive constellation background -->
   <canvas id="bg" class="fixed inset-0 -z-20"></canvas>
@@ -30,99 +53,330 @@
 
   <!-- Header -->
   <header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
-    
-    <button id="themeToggle" class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-300/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md soft-shadow hover:scale-[1.03] transition" aria-label="Toggle theme">
-      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-8a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm13.66 6.66a1 1 0 0 1-1.41 0l-.71-.7a1 1 0 1 1 1.41-1.42l.71.71a1 1 0 0 1 0 1.41Zm-10.6-10.6a1 1 0 0 1-1.42 0l-.7-.71A1 1 0 0 1 5.38 6l.71.71a1 1 0 0 1 0 1.41Zm10.6-1.41a1 1 0 0 1 0-1.41l.7-.71A1 1 0 1 1 19.4 6.1l-.71.71a1 1 0 0 1-1.41 0Zm-10.6 10.6a1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.7a1 1 0 0 1-1.41 0Z"/></svg>
-      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 hidden" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+    <button id="themeToggle"
+      class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-300/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md soft-shadow hover:scale-[1.03] transition"
+      aria-label="Toggle theme">
+      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+        <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-8a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm13.66 6.66a1 1 0 0 1-1.41 0l-.71-.7a1 1 0 1 1 1.41-1.42l.71.71a1 1 0 0 1 0 1.41Zm-10.6-10.6a1 1 0 0 1-1.42 0l-.7-.71A1 1 0 0 1 5.38 6l.71.71a1 1 0 0 1 0 1.41Zm10.6-1.41a1 1 0 0 1 0-1.41l.7-.71A1 1 0 1 1 19.4 6.1l-.71.71a1 1 0 0 1-1.41 0Zm-10.6 10.6a1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.7a1 1 0 0 1-1.41 0Z"/>
+      </svg>
+      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 hidden" fill="currentColor">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+      </svg>
     </button>
   </header>
 
   <!-- Hero Card -->
   <main class="min-h-screen grid place-items-center px-6">
-    <section id="card" class="relative w-full max-w-3xl glass soft-shadow border border-slate-200/70 dark:border-slate-700/70 rounded-3xl p-8 text-center transition-transform will-change-transform animate-[floaty_8s_ease-in-out_infinite]">
+    <section id="card"
+      class="relative w-full max-w-3xl glass soft-shadow border border-slate-200/70 dark:border-slate-700/70 rounded-3xl p-8 text-center transition-transform will-change-transform animate-[floaty_8s_ease-in-out_infinite]">
+
       <div class="inline-flex items-center gap-3 rounded-full border border-brand-200/70 dark:border-brand-700/40 px-3 py-1 text-xs bg-white/70 dark:bg-slate-900/60">
         <span class="h-2 w-2 rounded-full bg-brand-600 animate-pulse"></span>
         <span class="opacity-70">Status</span>
         <strong class="font-semibold">Updating</strong>
       </div>
-      <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Ahmed Abdullah</h1>
-      <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">What a waste my life would be without all the beautiful mistakes I've made.</p>
 
-      <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <a id="contactBtn" href="mailto:Finance@AhmedAbdullah.sa" class="group inline-flex items-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 px-5 py-3 text-sm font-semibold bg-white/70 dark:bg-slate-900/60 hover:bg-white/90 dark:hover:bg-slate-800 transition">
-          <span class="i">Contact</span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="currentColor"><path d="M2 4h20v16H2z" fill="none"/><path d="M22 6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6m20 0-8.5 6a3 3 0 0 1-3 0L2 6"/></svg>
-        </a>
-        <button id="copyBtn" class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 text-white px-5 py-3 text-sm font-semibold hover:bg-brand-700 transition">Copy Email</button>
+      <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">Ahmed Abdullah</h1>
+
+      <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+        What a waste my life would be without all the beautiful mistakes I've made.
+      </p>
+
+      <!-- Local time & weather (IP-based) -->
+      <div class="mt-6 flex justify-center">
+        <div id="localPill"
+          class="hidden items-center gap-2 rounded-full border border-slate-200/70 dark:border-slate-700/50 px-3 py-1 text-xs bg-white/60 dark:bg-slate-900/50">
+          <span id="localPlace" class="opacity-80">Locating…</span>
+          <span class="opacity-30">•</span>
+          <span id="localTime" class="tabular-nums">--:--</span>
+          <span class="opacity-30">•</span>
+          <span id="localWeather" class="tabular-nums">--°</span>
+        </div>
       </div>
 
-      <p class="mt-6 text-[11px] text-slate-500">Tip: press <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">T</kbd> to toggle theme. Move your mouse for constellations.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a id="contactBtn" href="mailto:Finance@AhmedAbdullah.sa"
+          class="group inline-flex items-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 px-5 py-3 text-sm font-semibold bg-white/70 dark:bg-slate-900/60 hover:bg-white/90 dark:hover:bg-slate-800 transition">
+          <span>Contact</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="currentColor">
+            <path d="M2 4h20v16H2z" fill="none"/>
+            <path d="M22 6v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6m20 0-8.5 6a3 3 0 0 1-3 0L2 6"/>
+          </svg>
+        </a>
+
+        <button id="copyBtn"
+          class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 text-white px-5 py-3 text-sm font-semibold hover:bg-brand-700 transition">
+          Copy Email
+        </button>
+      </div>
+
+      <p class="mt-6 text-[11px] text-slate-500">
+        Tip: press
+        <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">T</kbd>
+        to toggle theme. Move your mouse for constellations.
+      </p>
     </section>
   </main>
 
   <script>
-  // Everything in one guarded boot so nothing crashes
-  document.addEventListener('DOMContentLoaded', () => {
-    const root = document.documentElement;
-    const saved = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial = saved ? saved : (prefersDark ? 'dark' : 'light');
-    if(initial==='dark') root.classList.add('dark');
+    // Everything in one guarded boot so nothing crashes
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.documentElement;
 
-    const btn = document.getElementById('themeToggle');
-    const sun = document.getElementById('iconSun');
-    const moon = document.getElementById('iconMoon');
-    function setTheme(mode){
-      if(mode==='dark') root.classList.add('dark'); else root.classList.remove('dark');
-      localStorage.setItem('theme', mode);
-      const dark = root.classList.contains('dark');
-      if(sun&&moon){ sun.classList.toggle('hidden', dark); moon.classList.toggle('hidden', !dark); }
-    }
-    if(btn) btn.addEventListener('click',()=> setTheme(root.classList.contains('dark')?'light':'dark'));
-    window.addEventListener('keydown',(e)=>{ if(e.key && e.key.toLowerCase()==='t'){ setTheme(root.classList.contains('dark')?'light':'dark'); }});
+      // Theme init
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initial = saved ? saved : (prefersDark ? 'dark' : 'light');
+      if (initial === 'dark') root.classList.add('dark');
 
-    // Copy email button
-    const copyBtn=document.getElementById('copyBtn');
-    if(copyBtn){ copyBtn.addEventListener('click', async ()=>{
-      try{ await navigator.clipboard.writeText('Finance@AhmedAbdullah.sa'); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Email',1200);}catch(_){}
-    });}
+      const btn = document.getElementById('themeToggle');
+      const sun = document.getElementById('iconSun');
+      const moon = document.getElementById('iconMoon');
 
-    // Parallax tilt on the card
-    const card=document.getElementById('card');
-    if(card){
-      card.addEventListener('mousemove', (e)=>{
-        const r=card.getBoundingClientRect();
-        const x=(e.clientX-r.left)/r.width*2-1; // -1..1
-        const y=(e.clientY-r.top)/r.height*2-1;
-        card.style.transform=`rotateX(${(-y*4).toFixed(2)}deg) rotateY(${(x*4).toFixed(2)}deg)`;
-      });
-      card.addEventListener('mouseleave', ()=>{ card.style.transform='rotateX(0) rotateY(0)'; });
-    }
+      function setTheme(mode) {
+        if (mode === 'dark') root.classList.add('dark');
+        else root.classList.remove('dark');
+        localStorage.setItem('theme', mode);
 
-    // Constellation background (simple, performant)
-    const canvas=document.getElementById('bg');
-    if(canvas){
-      const ctx=canvas.getContext('2d');
-      let W,H,points=[],mouse={x:null,y:null};
-      function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; points=createPoints(); }
-      function createPoints(){ const arr=[]; const density=Math.min(120, Math.floor((W*H)/18000)); for(let i=0;i<density;i++){ arr.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*0.4,vy:(Math.random()-.5)*0.4}); } return arr; }
-      window.addEventListener('resize', resize); resize();
-      window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
-      window.addEventListener('mouseleave',()=>{mouse.x=null;mouse.y=null;});
-      (function loop(){ ctx.clearRect(0,0,W,H); const dark=root.classList.contains('dark'); ctx.fillStyle=dark?'rgba(59,130,246,.9)':'rgba(30,58,138,.9)'; ctx.strokeStyle=dark?'rgba(148,163,184,.35)':'rgba(51,65,85,.35)';
-        for(const p of points){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W) p.vx*=-1; if(p.y<0||p.y>H) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,1.2,0,Math.PI*2); ctx.fill(); }
-        for(let i=0;i<points.length;i++){
-          for(let j=i+1;j<points.length;j++){
-            const a=points[i], b=points[j]; const dx=a.x-b.x, dy=a.y-b.y; const d=dx*dx+dy*dy; if(d<10000){ const alpha=1-d/10000; ctx.globalAlpha=alpha*0.8; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.globalAlpha=1; }
-          }
+        const dark = root.classList.contains('dark');
+        if (sun && moon) {
+          sun.classList.toggle('hidden', dark);
+          moon.classList.toggle('hidden', !dark);
         }
-        if(mouse.x!==null){ for(const p of points){ const dx=mouse.x-p.x, dy=mouse.y-p.y; const d=Math.hypot(dx,dy); if(d<80){ p.vx-=dx*0.0005; p.vy-=dy*0.0005; } } }
-        requestAnimationFrame(loop);
-      })();
-    }
+      }
 
-    console.log('[STUDIO TEST] ✓ booted');
-  });
+      if (btn) btn.addEventListener('click', () =>
+        setTheme(root.classList.contains('dark') ? 'light' : 'dark')
+      );
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key && e.key.toLowerCase() === 't') {
+          setTheme(root.classList.contains('dark') ? 'light' : 'dark');
+        }
+      });
+
+      // Copy email button
+      const copyBtn = document.getElementById('copyBtn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText('Finance@AhmedAbdullah.sa');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = 'Copy Email', 1200);
+          } catch (_) { /* noop */ }
+        });
+      }
+
+      // Parallax tilt on the card
+      const card = document.getElementById('card');
+      if (card) {
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width * 2 - 1;  // -1..1
+          const y = (e.clientY - r.top) / r.height * 2 - 1;  // -1..1
+          card.style.transform = `rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'rotateX(0) rotateY(0)';
+        });
+      }
+
+      // Constellation background (simple, performant)
+      const canvas = document.getElementById('bg');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, points = [], mouse = { x: null, y: null };
+
+        function resize() {
+          W = canvas.width = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+          points = createPoints();
+        }
+
+        function createPoints() {
+          const arr = [];
+          const density = Math.min(120, Math.floor((W * H) / 18000));
+          for (let i = 0; i < density; i++) {
+            arr.push({
+              x: Math.random() * W,
+              y: Math.random() * H,
+              vx: (Math.random() - .5) * 0.4,
+              vy: (Math.random() - .5) * 0.4
+            });
+          }
+          return arr;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+
+        (function loop() {
+          ctx.clearRect(0, 0, W, H);
+
+          const dark = root.classList.contains('dark');
+          ctx.fillStyle = dark ? 'rgba(59,130,246,.9)' : 'rgba(30,58,138,.9)';
+          ctx.strokeStyle = dark ? 'rgba(148,163,184,.35)' : 'rgba(51,65,85,.35)';
+
+          for (const p of points) {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > W) p.vx *= -1;
+            if (p.y < 0 || p.y > H) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          for (let i = 0; i < points.length; i++) {
+            for (let j = i + 1; j < points.length; j++) {
+              const a = points[i], b = points[j];
+              const dx = a.x - b.x, dy = a.y - b.y;
+              const d2 = dx * dx + dy * dy;
+              if (d2 < 10000) {
+                const alpha = 1 - d2 / 10000;
+                ctx.globalAlpha = alpha * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+              }
+            }
+          }
+
+          if (mouse.x !== null) {
+            for (const p of points) {
+              const dx = mouse.x - p.x, dy = mouse.y - p.y;
+              const d = Math.hypot(dx, dy);
+              if (d < 80) {
+                p.vx -= dx * 0.0005;
+                p.vy -= dy * 0.0005;
+              }
+            }
+          }
+
+          requestAnimationFrame(loop);
+        })();
+      }
+
+      // --- Local time + weather (IP-based, no backend) ---
+      const localPill = document.getElementById('localPill');
+      const localPlace = document.getElementById('localPlace');
+      const localTime = document.getElementById('localTime');
+      const localWeather = document.getElementById('localWeather');
+
+      function wmoToEmoji(code) {
+        if (code === 0) return "☀️";
+        if (code === 1) return "🌤️";
+        if (code === 2) return "⛅";
+        if (code === 3) return "☁️";
+        if (code === 45 || code === 48) return "🌫️";
+        if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
+        if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
+        if ([71, 73, 75, 77, 85, 86].includes(code)) return "🌨️";
+        if ([80, 81, 82].includes(code)) return "🌧️";
+        if ([95, 96, 99].includes(code)) return "⛈️";
+        return "🌡️";
+      }
+
+      function formatTime(tz) {
+        try {
+          return new Intl.DateTimeFormat(undefined, {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: tz
+          }).format(new Date());
+        } catch {
+          return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(new Date());
+        }
+      }
+
+      async function fetchJson(url, timeoutMs = 4500) {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, {
+            signal: controller.signal,
+            headers: { 'Accept': 'application/json' }
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return await res.json();
+        } finally {
+          clearTimeout(t);
+        }
+      }
+
+      async function bootLocalInfo() {
+        if (!localPill || !localPlace || !localTime || !localWeather) return;
+
+        // show pill while loading
+        localPill.classList.remove('hidden');
+        localPill.classList.add('inline-flex');
+        localPlace.textContent = "Locating…";
+        localTime.textContent = "--:--";
+        localWeather.textContent = "--°";
+
+        // cache to reduce API calls
+        const CACHE_KEY = "geoWxCache_v1";
+        let cached = null;
+        try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch { /* noop */ }
+        const fresh = cached && (Date.now() - cached.t) < (6 * 60 * 60 * 1000); // 6 hours
+
+        try {
+          let place, tz, temp, code;
+
+          if (fresh) {
+            ({ place, tz, temp, code } = cached);
+          } else {
+            // 1) IP -> approximate lat/lon + timezone + city
+            const geo = await fetchJson("https://ipapi.co/json/");
+            const lat = geo.latitude;
+            const lon = geo.longitude;
+
+            place = [geo.city, geo.country_name].filter(Boolean).join(", ");
+            tz = geo.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            if (typeof lat !== "number" || typeof lon !== "number") throw new Error("Missing lat/lon");
+
+            // 2) lat/lon -> current weather (Open-Meteo)
+            const wxUrl =
+              `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}` +
+              `&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=auto`;
+
+            const wx = await fetchJson(wxUrl);
+            temp = wx?.current?.temperature_2m;
+            code = wx?.current?.weather_code;
+            tz = wx?.timezone || tz;
+
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), place, tz, temp, code }));
+          }
+
+          // render
+          localPlace.textContent = place || "Your area";
+          const emoji = (typeof code === "number") ? wmoToEmoji(code) : "🌡️";
+          localWeather.textContent = (typeof temp === "number")
+            ? `${emoji} ${Math.round(temp)}°C`
+            : `${emoji} --°`;
+
+          // ticking clock in visitor's inferred timezone
+          const tick = () => { localTime.textContent = formatTime(tz); };
+          tick();
+          setInterval(tick, 15000);
+        } catch (err) {
+          // fail quietly: preserve minimal aesthetic
+          localPill.classList.add('hidden');
+          localPill.classList.remove('inline-flex');
+        }
+      }
+
+      bootLocalInfo();
+
+      console.log('[STUDIO TEST] ✓ booted');
+    });
   </script>
 </body>
 </html>
