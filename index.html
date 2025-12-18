@@ -210,6 +210,10 @@ if (canvas) {
   let gameOn = true; // set to false if you want the game off by default
   let score = 0;
   let best = Number(localStorage.getItem('starBest') || 0);
+  const BASE_R = 3.6;      // starting size
+  const GROWTH = 1.15;     // bigger = faster growth
+  const MAX_R  = 28;       // cap so it doesn't become insane
+
 
   const player = { x: 0, y: 0, vx: 0, vy: 0, trail: [] };
   let stars = []; // collectibles
@@ -359,6 +363,7 @@ if (canvas) {
 
     // ---------- Mini-game layer ----------
     if (gameOn) {
+      const pr = Math.min(MAX_R, BASE_R + Math.sqrt(score) * GROWTH);
       // Player follows mouse with inertia
       const targetX = (mouse.x ?? W * 0.5);
       const targetY = (mouse.y ?? H * 0.5);
@@ -372,7 +377,7 @@ if (canvas) {
       player.vx *= 0.93;
       player.vy *= 0.93;
       const speed = Math.hypot(player.vx, player.vy);
-      const maxSpeed = 10;
+      const maxSpeed = Math.max(6, 12 - pr * 0.18);
       if (speed > maxSpeed) {
         player.vx = (player.vx / speed) * maxSpeed;
         player.vy = (player.vy / speed) * maxSpeed;
@@ -404,7 +409,7 @@ if (canvas) {
         const dy = s.y - player.y;
         const d = Math.hypot(dx, dy);
 
-        if (d < 18) {
+        if (d < (pr + s.r + 8)) {
           score += 1;
           if (score > best) {
             best = score;
@@ -443,13 +448,14 @@ if (canvas) {
       // render player (comet head)
       ctx.fillStyle = dark ? 'rgba(59,130,246,.95)' : 'rgba(37,99,235,.95)';
       ctx.beginPath();
-      ctx.arc(player.x, player.y, 3.6, 0, Math.PI * 2);
+      ctx.arc(player.x, player.y, pr, 0, Math.PI * 2);
       ctx.fill();
 
-      // tiny highlight
+      // tiny highlight (scales with size)
       ctx.fillStyle = 'rgba(255,255,255,.7)';
       ctx.beginPath();
-      ctx.arc(player.x - 1.2, player.y - 1.2, 1.2, 0, Math.PI * 2);
+      const hr = Math.max(1.2, pr * 0.28);
+      ctx.arc(player.x - pr * 0.32, player.y - pr * 0.32, hr, 0, Math.PI * 2);
       ctx.fill();
     }
 
