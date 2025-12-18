@@ -50,14 +50,18 @@
   <!-- Interactive constellation background -->
   <canvas id="bg" class="fixed inset-0 -z-20"></canvas>
   <div class="noise fixed pointer-events-none -z-10"></div>
+  <!-- Background mini-game HUD -->
   <div id="gameHud"
-  class="fixed bottom-4 left-4 z-20 hidden items-center gap-2 rounded-full border border-slate-200/40 dark:border-slate-700/50 px-3 py-1 text-xs bg-white/40 dark:bg-slate-900/40 backdrop-blur-md soft-shadow">
-  <span id="gameStatus" class="opacity-80">Game</span>
-  <span class="opacity-30">•</span>
-  <span id="gameScore" class="tabular-nums">0</span>
-  <span class="opacity-30">•</span>
-  <span id="gameBest" class="tabular-nums opacity-80">Best 0</span>
-</div>
+    class="fixed bottom-4 left-4 z-20 hidden items-center gap-2 rounded-full border border-slate-200/40 dark:border-slate-700/50 px-3 py-1 text-xs bg-white/40 dark:bg-slate-900/40 backdrop-blur-md soft-shadow">
+    <span id="gameStatus" class="opacity-80">Game</span>
+    <span class="opacity-30">•</span>
+    <span id="gameTime" class="tabular-nums">60.0s</span>
+    <span class="opacity-30">•</span>
+    <span id="gameScore" class="tabular-nums">0</span>
+    <span class="opacity-30">•</span>
+    <span id="gameBest" class="tabular-nums opacity-80">Best 0</span>
+  </div>
+
 
   <!-- Header -->
   <header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
@@ -201,6 +205,7 @@ if (canvas) {
   const gameScoreEl = document.getElementById('gameScore');
   const gameBestEl = document.getElementById('gameBest');
   const gameStatusEl = document.getElementById('gameStatus');
+  const gameTimeEl = document.getElementById('gameTime');
 
   let W, H;
   let points = [];
@@ -209,7 +214,12 @@ if (canvas) {
   // ---- Game state ----
   let gameOn = true; // set to false if you want the game off by default
   let score = 0;
-  let best = Number(localStorage.getItem('starBest') || 0);
+  let best = Number(localStorage.getItem('starBest') || 0); // (old best if you still want it)
+  let best60 = Number(localStorage.getItem('starBest60') || 0); // 60-second best
+  const ROUND_SECONDS = 60;
+  let roundRunning = false;
+  let roundEndAtMs = 0;
+  let timeLeft = ROUND_SECONDS;
   const BASE_R = 3.6;      // starting size
   const GROWTH = 1.15;     // bigger = faster growth
   const MAX_R  = 28;       // cap so it doesn't become insane
@@ -254,7 +264,13 @@ if (canvas) {
 
   function resetGame(keepScore = false) {
     if (!keepScore) score = 0;
+    
     best = Number(localStorage.getItem('starBest') || 0);
+    best60 = Number(localStorage.getItem('starBest60') || 0);
+    
+    roundRunning = false;
+    timeLeft = ROUND_SECONDS;
+    roundEndAtMs = 0;
 
     player.x = W * 0.5;
     player.y = H * 0.5;
@@ -270,13 +286,15 @@ if (canvas) {
   }
 
   function updateHud() {
+    best60 = Number(localStorage.getItem('starBest60') || best60);
     if (!gameHud || !gameScoreEl || !gameBestEl || !gameStatusEl) return;
     if (gameOn) {
       gameHud.classList.remove('hidden');
       gameHud.classList.add('inline-flex');
       gameStatusEl.textContent = "Game";
       gameScoreEl.textContent = String(score);
-      gameBestEl.textContent = `Best ${best}`;
+      gameBestEl.textContent = `Best ${best60}`;
+      if (gameTimeEl) gameTimeEl.textContent = `${timeLeft.toFixed(1)}s`;
     } else {
       gameHud.classList.add('hidden');
       gameHud.classList.remove('inline-flex');
@@ -288,6 +306,27 @@ if (canvas) {
     if (gameOn) resetGame(false);
     updateHud();
   }
+  function startRound() {
+  roundRunning = true;
+  const now = performance.now();
+  roundEndAtMs = now + ROUND_SECONDS * 1000;
+  timeLeft = ROUND_SECONDS;
+  if (gameStatusEl) gameStatusEl.textContent = "GO";
+  updateHud();
+}
+
+function endRound() {
+  roundRunning = false;
+  timeLeft = 0;
+
+  if (score > best60) {
+    best60 = score;
+    localStorage.setItem('starBest60', String(best60));
+  }
+
+  if (gameStatusEl) gameStatusEl.textContent = "Time up — click";
+  updateHud();
+}
 
   // Pointer + touch
   canvas.style.touchAction = 'none';
@@ -296,14 +335,30 @@ if (canvas) {
 
   // Dash (click/tap)
   window.addEventListener('pointerdown', () => {
-    if (!gameOn || mouse.x == null) return;
+    if (!gameOn) return;
+  
+    // If time is up, restart a fresh 60s run
+    if (!roundRunning && timeLeft === 0) {
+      resetGame(false);
+      startRound();
+    }
+  
+    // If not running yet, first click starts the timer
+    if (!roundRunning && timeLeft > 0) {
+      startRound();
+    }
+  
+    // Dash (only meaningful when we have a target)
+    if (mouse.x == null) return;
+  
     const dx = mouse.x - player.x;
     const dy = mouse.y - player.y;
     const d = Math.hypot(dx, dy) || 1;
-    const impulse = 6.2; // make bigger for more chaos
+    const impulse = 6.2;
     player.vx += (dx / d) * impulse;
     player.vy += (dy / d) * impulse;
   });
+
 
   // Toggle game with G
   window.addEventListener('keydown', (e) => {
@@ -364,6 +419,17 @@ if (canvas) {
     // ---------- Mini-game layer ----------
     if (gameOn) {
       const pr = Math.min(MAX_R, BASE_R + Math.sqrt(score) * GROWTH);
+      // Update countdown
+    if (roundRunning) {
+      const now = performance.now();
+      timeLeft = Math.max(0, (roundEndAtMs - now) / 1000);
+      if (timeLeft === 0) endRound();
+    } else {
+      // show full 60s before start
+      if (timeLeft > 0) timeLeft = ROUND_SECONDS;
+    }
+      if (gameTimeEl) gameTimeEl.textContent = `${timeLeft.toFixed(1)}s`;
+
       // Player follows mouse with inertia
       const targetX = (mouse.x ?? W * 0.5);
       const targetY = (mouse.y ?? H * 0.5);
@@ -409,18 +475,22 @@ if (canvas) {
         const dy = s.y - player.y;
         const d = Math.hypot(dx, dy);
 
-        if (d < (pr + s.r + 8)) {
-          score += 1;
-          if (score > best) {
-            best = score;
-            localStorage.setItem('starBest', String(best));
-          }
-          // respawn star + pulse effect
-          Object.assign(s, spawnStar());
-          s.pulse = 1;
-          updateHud();
+      if (roundRunning && d < (pr + s.r + 8)) {
+        score += 1;
+        if (score > best) {
+          best = score;
+          localStorage.setItem('starBest', String(best));
         }
+        if (score > best60) {
+          // don’t save best60 live; endRound() will save it once
+          best60 = score;
+        }
+      
+        Object.assign(s, spawnStar());
+        s.pulse = 1;
+        updateHud();
       }
+
 
       // render trail (soft)
       ctx.globalAlpha = 0.55;
