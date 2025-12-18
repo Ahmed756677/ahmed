@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -46,7 +46,7 @@
   </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 overflow-x-hidden">
   <!-- Interactive constellation background -->
   <canvas id="bg" class="fixed inset-0 -z-20"></canvas>
   <div class="noise fixed pointer-events-none -z-10"></div>
@@ -64,18 +64,13 @@
   </div>
 
   <!-- Header -->
-  <header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
-    <button id="themeToggle"
-      class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-300/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md soft-shadow hover:scale-[1.03] transition"
-      aria-label="Toggle theme">
-      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
-        <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-8a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm13.66 6.66a1 1 0 0 1-1.41 0l-.71-.7a1 1 0 1 1 1.41-1.42l.71.71a1 1 0 0 1 0 1.41Zm-10.6-10.6a1 1 0 0 1-1.42 0l-.7-.71A1 1 0 0 1 5.38 6l.71.71a1 1 0 0 1 0 1.41Zm10.6-1.41a1 1 0 0 1 0-1.41l.7-.71A1 1 0 1 1 19.4 6.1l-.71.71a1 1 0 0 1-1.41 0Zm-10.6 10.6a1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.7a1 1 0 0 1-1.41 0Z"/>
-      </svg>
-      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5 hidden" fill="currentColor">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
-      </svg>
-    </button>
-  </header>
+<header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
+  <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700/70 bg-slate-900/60 backdrop-blur-md soft-shadow">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+    </svg>
+  </div>
+</header>
 
   <!-- Hero Card -->
   <main class="min-h-screen grid place-items-center px-6">
@@ -124,9 +119,7 @@
       </div>
 
       <p class="mt-6 text-[11px] text-slate-500">
-        Tip: press
-        <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">T</kbd>
-        to toggle theme. Move your mouse for constellations. (Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">G</kbd> to hide game.)
+        Tip: Move your mouse for constellations. Click to play. Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">G</kbd> to hide the game.
       </p>
     </section>
   </main>
@@ -134,28 +127,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const root = document.documentElement;
+      root.classList.add('dark');
 
-      // Theme init
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initial = saved ? saved : (prefersDark ? 'dark' : 'light');
-      if (initial === 'dark') root.classList.add('dark');
 
-      const btn = document.getElementById('themeToggle');
-      const sun = document.getElementById('iconSun');
-      const moon = document.getElementById('iconMoon');
-
-      function setTheme(mode) {
-        if (mode === 'dark') root.classList.add('dark');
-        else root.classList.remove('dark');
-        localStorage.setItem('theme', mode);
-
-        const dark = root.classList.contains('dark');
-        if (sun && moon) {
-          sun.classList.toggle('hidden', dark);
-          moon.classList.toggle('hidden', !dark);
-        }
-      }
 
       if (btn) btn.addEventListener('click', () =>
         setTheme(root.classList.contains('dark') ? 'light' : 'dark')
