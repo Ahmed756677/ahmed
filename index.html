@@ -47,11 +47,11 @@
 </head>
 
 <body class="bg-slate-950 text-slate-100 overflow-x-hidden">
-  <!-- Interactive constellation background -->
+  <!-- Background -->
   <canvas id="bg" class="fixed inset-0 -z-20"></canvas>
   <div class="noise fixed pointer-events-none -z-10"></div>
 
-  <!-- Background mini-game HUD -->
+  <!-- Mini-game HUD -->
   <div id="gameHud"
     class="fixed bottom-4 left-4 z-20 hidden items-center gap-2 rounded-full border border-slate-200/40 dark:border-slate-700/50 px-3 py-1 text-xs bg-white/40 dark:bg-slate-900/40 backdrop-blur-md soft-shadow">
     <span id="gameStatus" class="opacity-80">Click to start</span>
@@ -63,14 +63,14 @@
     <span id="gameBest" class="tabular-nums opacity-80">Best 0</span>
   </div>
 
-  <!-- Header -->
-<header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
-  <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700/70 bg-slate-900/60 backdrop-blur-md soft-shadow">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
-    </svg>
-  </div>
-</header>
+  <!-- Header (dark-only icon) -->
+  <header class="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between">
+    <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-700/70 bg-slate-900/60 backdrop-blur-md soft-shadow">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+      </svg>
+    </div>
+  </header>
 
   <!-- Hero Card -->
   <main class="min-h-screen grid place-items-center px-6">
@@ -89,7 +89,7 @@
         What a waste my life would be without all the beautiful mistakes I've made.
       </p>
 
-      <!-- Local time & weather (IP-based) -->
+      <!-- Local time & weather -->
       <div class="mt-6 flex justify-center">
         <div id="localPill"
           class="hidden items-center gap-2 rounded-full border border-slate-200/70 dark:border-slate-700/50 px-3 py-1 text-xs bg-white/60 dark:bg-slate-900/50">
@@ -119,29 +119,19 @@
       </div>
 
       <p class="mt-6 text-[11px] text-slate-500">
-        Tip: Move your mouse for constellations. Click to play. Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">G</kbd> to hide the game.
+        Tip: Move your mouse for constellations. Click to play. Press
+        <kbd class="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800/70">G</kbd>
+        to hide the game.
       </p>
     </section>
   </main>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const root = document.documentElement;
-      root.classList.add('dark');
+      // Force dark forever
+      document.documentElement.classList.add('dark');
 
-
-
-      if (btn) btn.addEventListener('click', () =>
-        setTheme(root.classList.contains('dark') ? 'light' : 'dark')
-      );
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key && e.key.toLowerCase() === 't') {
-          setTheme(root.classList.contains('dark') ? 'light' : 'dark');
-        }
-      });
-
-      // Copy email button
+      // Copy email
       const copyBtn = document.getElementById('copyBtn');
       if (copyBtn) {
         copyBtn.addEventListener('click', async () => {
@@ -153,7 +143,7 @@
         });
       }
 
-      // Parallax tilt on the card
+      // Card tilt
       const card = document.getElementById('card');
       if (card) {
         card.addEventListener('mousemove', (e) => {
@@ -185,8 +175,8 @@
         let points = [];
         let mouse = { x: null, y: null };
 
-        // ---- Game state ----
-        let gameOn = true; // press G to toggle
+        // Game state
+        let gameOn = true;
         let score = 0;
         let best60 = Number(localStorage.getItem('starBest60') || 0);
 
@@ -340,11 +330,11 @@
         (function loop() {
           ctx.clearRect(0, 0, W, H);
 
-          const dark = root.classList.contains('dark');
+          const dark = true;
 
-          // ---- constellation layer ----
-          ctx.fillStyle = dark ? 'rgba(59,130,246,.9)' : 'rgba(30,58,138,.9)';
-          ctx.strokeStyle = dark ? 'rgba(148,163,184,.30)' : 'rgba(51,65,85,.30)';
+          // constellation layer
+          ctx.fillStyle = 'rgba(59,130,246,.9)';
+          ctx.strokeStyle = 'rgba(148,163,184,.30)';
 
           for (const p of points) {
             p.x += p.vx; p.y += p.vy;
@@ -373,7 +363,7 @@
             }
           }
 
-          // mouse force (original feel)
+          // mouse force
           if (mouse.x !== null) {
             for (const p of points) {
               const dx = mouse.x - p.x, dy = mouse.y - p.y;
@@ -385,7 +375,7 @@
             }
           }
 
-          // ---- mini-game layer ----
+          // mini-game
           if (gameOn) {
             const pr = Math.min(MAX_R, BASE_R + Math.sqrt(score) * GROWTH);
 
@@ -448,14 +438,13 @@
                 Object.assign(s, spawnStar());
                 s.pulse = 1;
               }
-            } // ✅ IMPORTANT: stars loop closes here (this was missing in your broken file)
+            }
 
-            // HUD update (lightweight)
             setHudText();
 
             // render trail
             ctx.globalAlpha = 0.55;
-            ctx.strokeStyle = dark ? 'rgba(96,165,250,.35)' : 'rgba(30,58,138,.28)';
+            ctx.strokeStyle = 'rgba(96,165,250,.35)';
             ctx.beginPath();
             for (let i = 0; i < player.trail.length; i++) {
               const t = player.trail[i];
@@ -469,7 +458,7 @@
             for (const s of stars) {
               const glow = 0.7 + (s.pulse || 0);
               ctx.globalAlpha = Math.min(1, glow);
-              ctx.fillStyle = dark ? 'rgba(191,219,254,.95)' : 'rgba(219,234,254,.95)';
+              ctx.fillStyle = 'rgba(191,219,254,.95)';
               ctx.beginPath();
               ctx.arc(s.x, s.y, s.r + (s.pulse * 2.2), 0, Math.PI * 2);
               ctx.fill();
@@ -477,7 +466,7 @@
             }
 
             // render player
-            ctx.fillStyle = dark ? 'rgba(59,130,246,.95)' : 'rgba(37,99,235,.95)';
+            ctx.fillStyle = 'rgba(59,130,246,.95)';
             ctx.beginPath();
             ctx.arc(player.x, player.y, pr, 0, Math.PI * 2);
             ctx.fill();
@@ -504,7 +493,6 @@
 
       function wmoToEmoji(code, isDay) {
         const day = isDay === true;
-
         if (code === 0) return day ? "☀️" : "🌙";
         if (code === 1) return day ? "🌤️" : "🌙☁️";
         if (code === 2) return day ? "⛅" : "☁️🌙";
